@@ -1,61 +1,51 @@
 ## Python Kontrollstrukturen Übung
 
 ## if, schleifen, break, pass, try-except je ein beispiel
-## if:
-punkte = 78
-
-if punkte >= 90:
-    print("Note 1")
-elif punkte >= 75:          ## elif = else if in Java
-    print("Note 2")
+# if/else
+x = 10
+if x > 5:
+    print("x ist größer als 5")
 else:
-    print("Schlechter als Note 2")
+    print("x ist 5 oder kleiner")
+print()
 
-print('---')
+# For-Schleife über eine Liste
+zahlen = [1, 2, 3]
+for z in zahlen:
+    print("Zahl:", z)
+print()
 
-## Schleifen:
-## for mit break:
-reihe = [1,2,3,4,5,6]
-for i in reihe:
-    if i == 3:
-        break               ## bricht die Schleife sofort ab
+# While-Schleife bis Bedingung erfüllt ist
+count = 0
+while count < 3:
+    print("Count:", count)
+    count += 1
+print()
+
+# break
+for i in range(10):
+    if i == 5:
+        print("Abbruch bei i =", i)
+        break
     print(i)
+print()
 
-print ('---')
+# pass
+def noch_nicht_fertig():
+    pass  # Platzhalter, damit der Code lauffähig bleibt
+print("Programm läuft trotzdem weiter")
+print()
 
-## while:
-i = 0
-while i < 10:
-    i += 1
-    print(i)
-
-print ('---')
-
-## pass
-class Haus:
-    pass            ## da passiert nichts weil pass als platzhalter dient für noch nicht implementierte sachen
-
-print ('---')
-
-## try except:
-try:                    ## ist wie try, catch in java. except ist hier einfach das catch
-    print(91/0)
-except ZeroDivisionError:
-    print("Division durch 0")
-print ('---')
+# try/except/finally
+try:
+    zahl = int("abc")  # Fehler: "abc" kann nicht in eine Zahl umgewandelt werden
+except ValueError:
+    print("Das war keine gültige Zahl!")
+finally:
+    print("Ich werde immer ausgeführt!")
+print()
 
 ## Bedingte Ausdrücke
 ## ist dafür da das man sachen kürzer darstellen kann
 x = 4
 print("ist größer als 5" if x > 5 else "Kleiner als 5")
-print ('---')
-
-## Match Case (Switch Case in Java)
-note = 2
-match note:
-    case 1 | 2:
-        print("Gut")
-    case 3 | 4:
-        print("Mittel")
-    case _:             ## _ = default in Java
-        print("Schlecht")
