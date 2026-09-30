@@ -49,3 +49,15 @@ print()
 ## ist dafür da das man sachen kürzer darstellen kann
 x = 4
 print("ist größer als 5" if x > 5 else "Kleiner als 5")
+print()
+
+## Switch-Case (match/case)
+## Python hat kein klassisches switch, seit Python 3.10 gibt es match/case
+tag = 3
+match tag:
+    case 1:
+        print("Montag")
+    case 2:
+        print("Dienstag")
+    case _:
+        print("Anderer Tag")  # _ ist der Standardfall
