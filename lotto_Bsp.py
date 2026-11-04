@@ -11,7 +11,7 @@ def draw_numbers():
     result = []
     n = 45  # Anzahl der noch verfügbaren Zahlen
 
-    for i in range(6):
+    for _ in range(6):
         index = random.randint(0, n - 1)
         result.append(numbers[index])
         # Gezogene Zahl ans Ende des aktiven Bereichs tauschen und diesen
