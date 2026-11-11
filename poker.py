@@ -1,127 +1,116 @@
 import random
 from collections import Counter
 
-farben = ["Herz", "Karo", "Pik", "Kreuz"]
-symbole = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Bube", "Dame", "König", "Ass"]
 
-symbol_werte = {
-    "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "10": 10,
-    "Bube": 11, "Dame": 12, "König": 13, "Ass": 14,
-}
+# Kartendeck erstellen
+SUITS: list[str] = ["Hearts", "Diamonds", "Spades", "Clubs"]
+VALUES: list[int] = list(range(2, 15))
 
-REFERENZ = {
-    "Hohe Karte": 50.1177,
-    "Paar": 42.2569,
-    "Zwei Paare": 4.7539,
-    "Drilling": 2.1128,
-    "Straße": 0.3925,
-    "Flush": 0.1965,
-    "Full House": 0.1441,
-    "Vierling": 0.0240,
-    "Straight Flush": 0.0015,
-}
+CARDS: list[tuple[int, str]] = [
+    (value, suit)
+    for suit in SUITS
+    for value in VALUES
+]
 
-
-def erstelle_deck():
-    """Erstellt ein Kartenspiel als Liste von Karten (jede Karte ist eine Liste [Symbol, Farbe])."""
-    deck = []
-    for farbe in farben:
-        for symbol in symbole:
-            deck.append([symbol, farbe])
-    return deck
+COMBINATIONS: list[str] = [
+    "Royal Flush",
+    "Straight Flush",
+    "Four of a Kind",
+    "Full House",
+    "Flush",
+    "Straight",
+    "Three of a Kind",
+    "Two Pair",
+    "One Pair",
+    "High Card",
+]
 
 
-def ziehe_hand(deck, rng=random):
-    """Zieht 5 verschiedene Karten ohne Zurücklegen."""
-    return rng.sample(deck, 5)
+def combination(hand: list[tuple[int, str]]) -> str:
+    """Determines the poker combination of a five-card hand."""
 
+    hand_values: list[int] = [card[0] for card in hand]
+    hand_suits: list[str] = [card[1] for card in hand]
 
-def gleiche_anzahl(werte):
-    """Häufigkeiten gleicher Werte, absteigend sortiert, z.B. [2, 2, 1]."""
-    return sorted(Counter(werte).values(), reverse=True)
+    counts: list[int] = sorted(
+        Counter(hand_values).values(),
+        reverse=True
+    )
 
+    same_suit: bool = len(set(hand_suits)) == 1
+    sorted_values: list[int] = sorted(set(hand_values))
 
-def ist_paar(werte):
-    """Genau ein Paar: die größte Gruppe hat 2 Karten."""
-    return gleiche_anzahl(werte)[0] == 2
+    # Check for special combinations
+    royal_flush: bool = (
+        same_suit
+        and sorted_values == [10, 11, 12, 13, 14]
+    )
 
+    straight: bool = (
+        len(sorted_values) == 5
+        and (
+            sorted_values[-1] - sorted_values[0] == 4
+            or sorted_values == [2, 3, 4, 5, 14]
+        )
+    )
 
-def ist_drilling(werte):
-    """Drei Karten mit gleichem Wert."""
-    return gleiche_anzahl(werte)[0] == 3
-
-
-def ist_zwei_paare(werte):
-    """Zwei verschiedene Paare."""
-    return gleiche_anzahl(werte)[:2] == [2, 2]
-
-
-def ist_flush(farben_hand):
-    """Alle fünf Karten haben dieselbe Farbe."""
-    return len(set(farben_hand)) == 1
-
-
-def ist_strasse(werte):
-    """Fünf aufeinanderfolgende Werte. Auch A-2-3-4-5 zählt."""
-    einzigartig = sorted(set(werte))
-    if len(einzigartig) != 5:
-        return False
-    if einzigartig[-1] - einzigartig[0] == 4:
-        return True
-    return einzigartig == [2, 3, 4, 5, 14]  # Ass als niedrigste Karte
-
-
-def ist_full_house(werte):
-    """Drilling plus Paar."""
-    return gleiche_anzahl(werte) == [3, 2]
-
-
-def ist_vierling(werte):
-    """Vier Karten mit gleichem Wert."""
-    return gleiche_anzahl(werte)[0] == 4
-
-
-def ist_straight_flush(werte, farben_hand):
-    """Straße und Flush gleichzeitig."""
-    return ist_strasse(werte) and ist_flush(farben_hand)
-
-
-def bewerte(hand):
-    """Bestimmt die höchste Kombination einer 5-Karten-Hand."""
-    werte = [symbol_werte[symbol] for symbol, _ in hand]
-    farben_hand = [farbe for _, farbe in hand]
-
-    if ist_straight_flush(werte, farben_hand):
+    if royal_flush:
+        return "Royal Flush"
+    elif same_suit and straight:
         return "Straight Flush"
-    if ist_vierling(werte):
-        return "Vierling"
-    if ist_full_house(werte):
+    elif counts == [4, 1]:
+        return "Four of a Kind"
+    elif counts == [3, 2]:
         return "Full House"
-    if ist_flush(farben_hand):
+    elif same_suit:
         return "Flush"
-    if ist_strasse(werte):
-        return "Straße"
-    if ist_drilling(werte):
-        return "Drilling"
-    if ist_zwei_paare(werte):
-        return "Zwei Paare"
-    if ist_paar(werte):
-        return "Paar"
-    return "Hohe Karte"
+    elif straight:
+        return "Straight"
+    elif counts == [3, 1, 1]:
+        return "Three of a Kind"
+    elif counts == [2, 2, 1]:
+        return "Two Pair"
+    elif counts == [2, 1, 1, 1]:
+        return "One Pair"
+    else:
+        return "High Card"
 
 
-def simuliere(anzahl=100000, seed=None):
-    """Spielt `anzahl` Hände und zählt die Kombinationen."""
-    rng = random.Random(seed)
-    deck = erstelle_deck()
-    zaehler = Counter()
-    for _ in range(anzahl):
-        zaehler[bewerte(ziehe_hand(deck, rng))] += 1
-    return zaehler
+def simulate_games(number_of_games: int) -> Counter[str]:
+    """Simulates poker games and counts each combination."""
+
+    results: Counter[str] = Counter()
+
+    for _ in range(number_of_games):
+        hand: list[tuple[int, str]] = random.sample(CARDS, 5)
+        result: str = combination(hand)
+        results[result] += 1
+
+    return results
+
+
+def print_results(
+    results: Counter[str],
+    number_of_games: int
+) -> None:
+    """Prints the number and percentage of each combination."""
+
+    for name in COMBINATIONS:
+        count: int = results[name]
+        percentage: float = count / number_of_games * 100
+
+        print(
+            f"{name}: {count} times - "
+            f"{percentage:.4f} %"
+        )
+
+
+def main() -> None:
+    number_of_games: int = 100_000
+
+    results: Counter[str] = simulate_games(number_of_games)
+    print_results(results, number_of_games)
 
 
 if __name__ == "__main__":
-    ANZAHL = 100000
-    ergebnis = simuliere(ANZAHL, seed=42)
-    for kombi, n in ergebnis.most_common():
-        print(kombi, n)
+    main()
